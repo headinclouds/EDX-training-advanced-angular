@@ -1,17 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { GitSearchService } from '../git-search.service';
-import { GitSearch } from '../git-search';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { AdvancedSearchModel } from '../advanced-search-model';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-
+//import { GitSearchService } from '../git-search-service.service';
+import { GitSearch } from '../git-search';
+import { UnifiedSearchService } from '../unified-search.service';
+import { GitCodeSearch } from '../git-code-search';
 @Component({
   selector: 'app-git-search',
   templateUrl: './git-search.component.html',
   styleUrls: ['./git-search.component.css']
 })
 export class GitSearchComponent implements OnInit {
-  searchResults: GitSearch;
+  searchResultsRepo: GitSearch;
+  searchResultsCode: GitCodeSearch;
   searchQuery: string;
   displayQuery: string;
   title: string;
@@ -20,15 +22,14 @@ export class GitSearchComponent implements OnInit {
   form: FormGroup;
   type: Array<any> = [];
   formControls = {};
-  constructor(private GitSearchService: GitSearchService, private route: ActivatedRoute, private router: Router) { }
+  constructor(private UnifiedSearchService: UnifiedSearchService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
     this.model = new AdvancedSearchModel('', '', '', null, null, '');
-    console.log(this.model, 'model', typeof this.model.q)
     this.modelKeys = Object.keys(this.model);
     this.modelKeys.forEach((key) => {
       let validators = [];
-      if (key === 'q') {
+      if (key === 'q' || key === 'user') {
           validators.push(Validators.required);
       }
       if (key === 'stars') {
@@ -47,7 +48,7 @@ export class GitSearchComponent implements OnInit {
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.searchQuery = params.get('query');
       this.displayQuery = params.get('query');
-      this.gitSearch();
+     // this.gitSearch();
     })
     this.route.data.subscribe((result) => {
       this.title = result.title
@@ -88,15 +89,17 @@ export class GitSearchComponent implements OnInit {
 }
 
   gitSearch = () => {
-    this.GitSearchService.gitSearch(this.searchQuery).then((response) => {
-      this.searchResults = response;
+    this.UnifiedSearchService.unifiedSearch(this.searchQuery).subscribe((response) => {
+      console.log(response, 'responce');
+      this.searchResultsRepo = response.repositories;
+      this.searchResultsCode = response.code;
     }, (error) => {
       alert("Error: " + error.statusText)
     })
   }
 
   sendQuery = () => {
-    this.searchResults = null;
+    this.searchResultsRepo = this.searchResultsCode = null;
     let search: string = this.form.value['q'];
     let params: string = "";
     this.modelKeys.forEach((elem) => {
@@ -112,7 +115,8 @@ export class GitSearchComponent implements OnInit {
       this.searchQuery = search + params;
     }
     this.displayQuery = this.searchQuery;
-    this.router.navigate(['/search/' + this.searchQuery])
+    this.router.navigate(['/search/'+this.searchQuery]);
+    this.gitSearch();
   }
 
 }

@@ -1,29 +1,34 @@
 import { Injectable, Inject } from '@angular/core';
 import { GitSearch } from './git-search';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import 'rxjs/add/operator/toPromise';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/publishReplay';
 
 @Injectable()
 export class GitSearchService {
-  cachedValues: Array<{
-      [query: string]: GitSearch
-  }> = [];
-  constructor(@Inject(Http) private http: Http) {
-  }
+    cachedSearches: Array<{
+        [query: string]: GitSearch
+    }> = [];
+    cachedValue: string;
+    search: Observable<GitSearch>;
+    constructor(private http: HttpClient) {
+    }
 
-  gitSearch : Function = (query: string) : Promise<GitSearch> => {
-    let promise = new Promise((resolve, reject) => {
-        if (this.cachedValues[query]) {
-            resolve(this.cachedValues[query])
+    gitSearch: Function = (query: string): Observable<GitSearch> => {
+        console.log(query, this.cachedValue, this.search);
+        if (!this.search) {
+            this.search = this.http.get<GitSearch>('https://api.github.com/search/repositories?q=' + query)
+                .publishReplay(1)
+                .refCount();
+            this.cachedValue = query;
         }
-        else {
-            this.http.get('https://api.github.com/search/repositories?q=' + query)
-            .toPromise()
-            .then( (response) => {
-                resolve(response.json())
-            })
+        else if (this.cachedValue !== query) {
+            this.search = null;
+            this.gitSearch(query);
         }
-    })
-    return promise;
-  }
+        console.log(this.search, 'this.search');
+        return this.search;
+    }
 }
+
