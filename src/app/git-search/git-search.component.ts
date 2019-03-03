@@ -12,8 +12,7 @@ import { GitCodeSearch } from '../git-code-search';
   styleUrls: ['./git-search.component.css']
 })
 export class GitSearchComponent implements OnInit {
-  searchResultsRepo: GitSearch;
-  searchResultsCode: GitCodeSearch;
+  searchResults: GitSearch;
   searchQuery: string;
   displayQuery: string;
   title: string;
@@ -91,15 +90,14 @@ export class GitSearchComponent implements OnInit {
   gitSearch = () => {
     this.UnifiedSearchService.unifiedSearch(this.searchQuery).subscribe((response) => {
       console.log(response, 'responce');
-      this.searchResultsRepo = response.repositories;
-      this.searchResultsCode = response.code;
+      this.searchResults = response;
     }, (error) => {
       alert("Error: " + error.statusText)
     })
   }
 
   sendQuery = () => {
-    this.searchResultsRepo = this.searchResultsCode = null;
+    this.searchResults = null;
     let search: string = this.form.value['q'];
     let params: string = "";
     this.modelKeys.forEach((elem) => {

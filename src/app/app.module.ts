@@ -10,6 +10,8 @@ import { GitSearchComponent } from './git-search/git-search.component';
 import { RouterModule, Routes } from '@angular/router';
 import { HomePageComponent } from './home-page/home-page.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { RepositoryDisplayComponent } from './repository-display/repository-display.component';
+import { CodeDisplayComponent } from './code-display/code-display.component';
 
 const appRoutes: Routes = [
   {
@@ -34,7 +36,9 @@ const appRoutes: Routes = [
     AppComponent,
     GitSearchComponent,
     HomePageComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    RepositoryDisplayComponent,
+    CodeDisplayComponent
   ],
   imports: [
     BrowserModule,
