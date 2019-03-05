@@ -21,6 +21,7 @@ export class GitSearchComponent implements OnInit {
   form: FormGroup;
   type: Array<any> = [];
   formControls = {};
+  favorites: Array<number> = [];
   constructor(private UnifiedSearchService: UnifiedSearchService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
@@ -52,6 +53,14 @@ export class GitSearchComponent implements OnInit {
     this.route.data.subscribe((result) => {
       this.title = result.title
     });
+  }
+
+  checkType = (key) => {
+    return typeof key === 'string' ? 'text' : typeof key;
+  }
+
+  handleFavorite = (id) => {
+    return this.favorites.push(id);
   }
 
   get q() {
